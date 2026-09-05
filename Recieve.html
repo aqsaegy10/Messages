@@ -152,8 +152,8 @@
     <span>عرض المستندات</span>
   </div>
   <nav>
-    <a href="index.html">الوارد</a>
-    <a href="viewer.html" class="active">العرض</a>
+    <a href="https://aqsaegy10.github.io/Messages/Send.html">الوارد</a>
+    <a href="https://aqsaegy10.github.io/Messages/Recieve.html" class="active">العرض</a>
   </nav>
 </header>
 
@@ -271,13 +271,13 @@ function openDoc(id, opts){
   document.getElementById('dlBtn').addEventListener('click', ()=> downloadEntry(entry));
 
   overlay.classList.add('open');
-  history.replaceState(null, '', `viewer.html?id=${entry.id}`);
+  history.replaceState(null, '', `https://aqsaegy10.github.io/Messages/Recieve.html?id=${entry.id}`);
   stopTitleFlash();
 }
 
 function closeDoc(){
   document.getElementById('overlay').classList.remove('open');
-  history.replaceState(null, '', 'viewer.html');
+  history.replaceState(null, '', 'https://aqsaegy10.github.io/Messages/Recieve.html');
 }
 
 function getLatestEntry(list){
