@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الأرشيف — العرض</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F6F1E7;
+    --paper-deep: #EFE7D6;
+    --ink: #1B2A4A;
+    --ink-soft: #3A4A6B;
+    --brass: #B08D57;
+    --brass-deep: #8F7140;
+    --stamp: #8B3A3A;
+    --muted: #6B6558;
+    --line: rgba(27,42,74,0.16);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper); color:var(--ink); font-family:'Tajawal', sans-serif; min-height:100vh;
+    background-image:
+      radial-gradient(circle at 100% 0%, rgba(176,141,87,0.10), transparent 45%),
+      radial-gradient(circle at 0% 100%, rgba(27,42,74,0.06), transparent 40%);
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 40px; border-bottom:1px solid var(--line); background:var(--paper);
+  }
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand h1{font-family:'Amiri', serif; font-weight:700; font-size:28px; margin:0; color:var(--ink); letter-spacing:.5px;}
+  .brand span{font-size:13px; color:var(--muted);}
+  nav{display:flex; gap:6px;}
+  nav a{
+    font-size:14px; text-decoration:none; color:var(--ink-soft); padding:8px 16px;
+    border:1px solid var(--line); border-radius:2px; transition:background .15s ease, color .15s ease;
+  }
+  nav a.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  nav a:not(.active):hover{background:var(--paper-deep);}
+
+  main{max-width:980px; margin:0 auto; padding:36px 40px 80px;}
+
+  .panel{
+    background:#fff; border:1px solid var(--line); border-radius:3px; padding:28px 30px;
+    box-shadow:0 1px 0 rgba(27,42,74,0.03);
+  }
+  .panel h2{
+    font-family:'Amiri', serif; font-size:21px; margin:0 0 18px; color:var(--ink);
+    border-bottom:2px solid var(--brass); display:inline-block; padding-bottom:6px;
+  }
+
+  .search-row{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .search-row input{
+    flex:1; padding:11px 14px; border:1px solid var(--line); border-radius:2px;
+    font-family:'Tajawal'; font-size:14px; background:var(--paper); color:var(--ink);
+  }
+  .search-row input:focus{outline:2px solid var(--brass); outline-offset:1px;}
+  .count-badge{font-size:13px; color:var(--muted); white-space:nowrap;}
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px;}
+  @media(max-width:680px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    border:1px solid var(--line); border-radius:2px; padding:16px 18px; cursor:pointer;
+    transition:border-color .15s ease, background .15s ease; background:var(--paper);
+  }
+  .card:hover{border-color:var(--brass); background:#fff;}
+  .card-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .card-seq{font-family:'Amiri', serif; font-weight:700; color:var(--brass-deep); font-size:16px;}
+  .type-badge{font-size:11px; padding:3px 9px; border-radius:20px; border:1px solid var(--line); color:var(--ink-soft);}
+  .type-badge.pdf{border-color:var(--stamp); color:var(--stamp);}
+  .card-title{font-size:14.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .card-time{font-size:12.5px; color:var(--muted); margin-top:6px;}
+
+  .empty{padding:40px 10px; text-align:center; color:var(--muted); font-size:14.5px;}
+  .empty strong{display:block; font-family:'Amiri', serif; font-size:19px; color:var(--ink-soft); margin-bottom:6px;}
+
+  /* Modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(27,42,74,0.72); display:none;
+    align-items:center; justify-content:center; padding:4vh 20px; z-index:100;
+    backdrop-filter:blur(3px);
+  }
+  .overlay.open{display:flex;}
+  .doc{
+    background:#fff; width:100%; max-width:900px; max-height:92vh; overflow:auto;
+    border-radius:4px; box-shadow:0 30px 80px rgba(0,0,0,0.35);
+    animation:rise .25s cubic-bezier(.2,.7,.3,1);
+  }
+  .doc.alert-pulse{ animation:rise .25s cubic-bezier(.2,.7,.3,1), pulseRing 1.1s ease-out 2; }
+  @keyframes rise{ from{ transform:translateY(24px) scale(.98); opacity:0; } to{ transform:translateY(0) scale(1); opacity:1; } }
+  @keyframes pulseRing{
+    0%{ box-shadow:0 30px 80px rgba(0,0,0,0.35), 0 0 0 0 rgba(176,141,87,0.6); }
+    70%{ box-shadow:0 30px 80px rgba(0,0,0,0.35), 0 0 0 22px rgba(176,141,87,0); }
+    100%{ box-shadow:0 30px 80px rgba(0,0,0,0.35), 0 0 0 0 rgba(176,141,87,0); }
+  }
+
+  .new-flag{
+    display:none; align-items:center; gap:8px; background:var(--stamp); color:#fff;
+    font-size:12.5px; padding:6px 14px; border-radius:20px; margin-bottom:14px; width:fit-content;
+  }
+  .new-flag.show{display:flex;}
+  .new-flag .dot{width:7px; height:7px; border-radius:50%; background:#fff; animation:blink 1s infinite;}
+  @keyframes blink{ 50%{ opacity:.25; } }
+
+  .doc-head{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:32px 38px 20px; border-bottom:2px solid var(--brass);
+  }
+  .doc-head-title{font-family:'Amiri', serif; font-size:30px; color:var(--ink); margin:0 0 8px; word-break:break-word; line-height:1.3;}
+  .doc-head-meta{font-size:13px; color:var(--muted);}
+  .doc-seal{
+    font-family:'Amiri', serif; font-size:13px; color:var(--brass-deep); border:2px solid var(--brass);
+    border-radius:50%; width:68px; height:68px; display:flex; align-items:center; justify-content:center;
+    text-align:center; flex-shrink:0; margin-inline-start:16px; line-height:1.25;
+  }
+  .doc-body{padding:32px 38px;}
+  .doc-text{
+    white-space:pre-wrap; line-height:2.1; font-size:19px; color:var(--ink); font-family:'Tajawal';
+  }
+  .doc-pdf-frame{width:100%; height:70vh; border:1px solid var(--line); border-radius:2px;}
+  .doc-foot{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 38px 32px; gap:10px; flex-wrap:wrap;
+  }
+  .doc-actions{display:flex; gap:10px;}
+  button.dl, button.close-btn{
+    font-family:'Tajawal'; font-size:15px; border-radius:2px; cursor:pointer; padding:12px 24px;
+  }
+  button.dl{background:var(--ink); color:var(--paper); border:none;}
+  button.dl:hover{background:var(--ink-soft);}
+  button.close-btn{background:none; border:1px solid var(--line); color:var(--ink-soft);}
+  button.close-btn:hover{background:var(--paper-deep);}
+
+  .notify-btn{
+    font-family:'Tajawal'; font-size:12.5px; border:1px solid var(--line); background:none;
+    color:var(--ink-soft); padding:7px 14px; border-radius:2px; cursor:pointer; white-space:nowrap;
+  }
+  .notify-btn:hover{background:var(--paper-deep);}
+  .notify-btn.on{border-color:var(--brass); color:var(--brass-deep);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>الأرشيف</h1>
+    <span>عرض المستندات</span>
+  </div>
+  <nav>
+    <a href="index.html">الوارد</a>
+    <a href="viewer.html" class="active">العرض</a>
+  </nav>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>الفهرس</h2>
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="ابحث بالنص أو باسم الملف...">
+      <div class="count-badge" id="countBadge">0 عنصر</div>
+      <button class="notify-btn" id="notifyBtn">تفعيل تنبيهات الخلفية</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="emptyState" style="display:none;">
+      <strong>لا توجد مستندات للعرض</strong>
+      أضف رسالة أو ملف PDF من صفحة "الوارد" أولًا.
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="doc" id="docCard"></div>
+</div>
+
+<script>
+const STORE_KEY = 'archive_store_v1';
+
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function formatTimestamp(iso){
+  const d = new Date(iso);
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}  ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+function formatSize(bytes){
+  if(!bytes) return '';
+  const kb = bytes/1024;
+  return kb < 1024 ? `${kb.toFixed(0)} كيلوبايت` : `${(kb/1024).toFixed(1)} ميغابايت`;
+}
+
+function renderGrid(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = loadEntries();
+  if(q){
+    list = list.filter(e=>{
+      const hay = (e.title + ' ' + (e.filename||'') + ' ' + (e.type==='text'? e.content : '')).toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  document.getElementById('countBadge').textContent = `${list.length} عنصر`;
+  document.getElementById('emptyState').style.display = list.length ? 'none' : 'block';
+
+  list.forEach(e=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const snippet = e.type === 'text' ? e.title : (e.filename || 'ملف PDF');
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="card-seq">#${e.seq}</span>
+        <span class="type-badge ${e.type}">${e.type === 'pdf' ? 'PDF' : 'نص'}</span>
+      </div>
+      <div class="card-title" title="${snippet.replace(/"/g,'&quot;')}">${snippet}</div>
+      <div class="card-time">${formatTimestamp(e.timestamp)}</div>
+    `;
+    card.addEventListener('click', ()=> openDoc(e.id));
+    grid.appendChild(card);
+  });
+}
+
+let currentShownId = null;
+let titleFlashTimer = null;
+const ORIGINAL_TITLE = document.title;
+
+function openDoc(id, opts){
+  opts = opts || {};
+  const entry = loadEntries().find(e=>e.id === id);
+  if(!entry) return;
+  currentShownId = entry.id;
+  const overlay = document.getElementById('overlay');
+  const docCard = document.getElementById('docCard');
+
+  const bodyHtml = entry.type === 'text'
+    ? `<div class="doc-text">${entry.content.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`
+    : `<iframe class="doc-pdf-frame" src="${entry.content}"></iframe>`;
+
+  const metaLine = entry.type === 'pdf'
+    ? `${entry.filename} · ${formatSize(entry.size)} · حُفظ في ${formatTimestamp(entry.timestamp)}`
+    : `حُفظ في ${formatTimestamp(entry.timestamp)}`;
+
+  docCard.className = 'doc' + (opts.isNew ? ' alert-pulse' : '');
+  docCard.innerHTML = `
+    <div class="doc-head">
+      <div>
+        <div class="new-flag ${opts.isNew ? 'show' : ''}"><span class="dot"></span> رسالة جديدة الآن</div>
+        <p class="doc-head-title">${entry.type === 'pdf' ? entry.filename : 'رسالة رقم ' + entry.seq}</p>
+        <div class="doc-head-meta">${metaLine}</div>
+      </div>
+      <div class="doc-seal">أرشيف<br>#${entry.seq}</div>
+    </div>
+    <div class="doc-body">${bodyHtml}</div>
+    <div class="doc-foot">
+      <div class="doc-actions">
+        <button class="dl" id="dlBtn">تحميل</button>
+        <button class="close-btn" id="closeBtn">إغلاق</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('closeBtn').addEventListener('click', closeDoc);
+  document.getElementById('dlBtn').addEventListener('click', ()=> downloadEntry(entry));
+
+  overlay.classList.add('open');
+  history.replaceState(null, '', `viewer.html?id=${entry.id}`);
+  stopTitleFlash();
+}
+
+function closeDoc(){
+  document.getElementById('overlay').classList.remove('open');
+  history.replaceState(null, '', 'viewer.html');
+}
+
+function getLatestEntry(list){
+  if(!list.length) return null;
+  return list.reduce((a,b)=> (a.seq > b.seq ? a : b));
+}
+
+// يعيد فتح آخر رسالة تلقائيًا كلما أُضيف عنصر جديد، حتى إن كانت الصفحة في الخلفية
+function checkForNewEntry(){
+  const list = loadEntries();
+  const latest = getLatestEntry(list);
+  if(!latest) return;
+  if(latest.id !== currentShownId){
+    const isFirstLoad = currentShownId === null;
+    openDoc(latest.id, { isNew: !isFirstLoad });
+    if(!isFirstLoad) alertBackgroundTab(latest);
+  }
+}
+
+function alertBackgroundTab(entry){
+  if(document.hidden){
+    startTitleFlash();
+    if('Notification' in window && Notification.permission === 'granted'){
+      const n = new Notification('رسالة جديدة في الأرشيف', {
+        body: entry.type === 'pdf' ? entry.filename : entry.title
+      });
+      n.onclick = () => { window.focus(); n.close(); };
+    }
+  }
+}
+
+function startTitleFlash(){
+  stopTitleFlash();
+  let on = false;
+  titleFlashTimer = setInterval(()=>{
+    document.title = on ? ORIGINAL_TITLE : '📩 رسالة جديدة —';
+    on = !on;
+  }, 1000);
+}
+function stopTitleFlash(){
+  if(titleFlashTimer){ clearInterval(titleFlashTimer); titleFlashTimer = null; }
+  document.title = ORIGINAL_TITLE;
+}
+
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden){ stopTitleFlash(); checkForNewEntry(); }
+});
+
+// إشعارات الخلفية (اختياري): تعمل حتى لو كانت الصفحة غير ظاهرة على الشاشة
+const notifyBtn = document.getElementById('notifyBtn');
+function refreshNotifyBtn(){
+  if('Notification' in window && Notification.permission === 'granted'){
+    notifyBtn.textContent = 'تنبيهات الخلفية مفعّلة';
+    notifyBtn.classList.add('on');
+  }
+}
+notifyBtn.addEventListener('click', ()=>{
+  if(!('Notification' in window)){ alert('المتصفح لا يدعم إشعارات النظام.'); return; }
+  Notification.requestPermission().then(refreshNotifyBtn);
+});
+refreshNotifyBtn();
+
+// عند تغيّر التخزين من تبويب آخر (مثل صفحة الوارد) — يعمل فورًا حتى لو هذه الصفحة في الخلفية
+window.addEventListener('storage', (e)=>{
+  if(e.key === STORE_KEY){
+    renderGrid();
+    checkForNewEntry();
+  }
+});
+
+function downloadEntry(entry){
+  const a = document.createElement('a');
+  if(entry.type === 'pdf'){
+    a.href = entry.content;
+    a.download = entry.filename || `مستند-${entry.seq}.pdf`;
+  } else {
+    const blob = new Blob([entry.content], {type:'text/plain;charset=utf-8'});
+    a.href = URL.createObjectURL(blob);
+    a.download = `رسالة-${entry.seq}.txt`;
+  }
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+document.getElementById('overlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'overlay') closeDoc();
+});
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') closeDoc();
+});
+document.getElementById('searchInput').addEventListener('input', renderGrid);
+
+// init: تُعرض الرسالة المحددة عبر الرابط، وإلا فآخر رسالة حالية تلقائيًا وبشكل بارز
+renderGrid();
+const params = new URLSearchParams(location.search);
+const initialId = params.get('id');
+if(initialId){
+  openDoc(initialId);
+  currentShownId = initialId;
+} else {
+  checkForNewEntry();
+}
+</script>
+</body>
+</html>

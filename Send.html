@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الأرشيف — الوارد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F6F1E7;
+    --paper-deep: #EFE7D6;
+    --ink: #1B2A4A;
+    --ink-soft: #3A4A6B;
+    --brass: #B08D57;
+    --brass-deep: #8F7140;
+    --stamp: #8B3A3A;
+    --muted: #6B6558;
+    --line: rgba(27,42,74,0.16);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Tajawal', sans-serif;
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 100% 0%, rgba(176,141,87,0.10), transparent 45%),
+      radial-gradient(circle at 0% 100%, rgba(27,42,74,0.06), transparent 40%);
+  }
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 40px; border-bottom:1px solid var(--line);
+    background:var(--paper);
+  }
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand h1{
+    font-family:'Amiri', serif; font-weight:700; font-size:28px; margin:0; color:var(--ink);
+    letter-spacing:0.5px;
+  }
+  .brand span{font-size:13px; color:var(--muted);}
+  nav{display:flex; gap:6px;}
+  nav a{
+    font-size:14px; text-decoration:none; color:var(--ink-soft);
+    padding:8px 16px; border:1px solid var(--line); border-radius:2px;
+    transition:background .15s ease, color .15s ease;
+  }
+  nav a.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  nav a:not(.active):hover{background:var(--paper-deep);}
+
+  main{max-width:980px; margin:0 auto; padding:36px 40px 80px;}
+
+  .panel{
+    background:#fff; border:1px solid var(--line); border-radius:3px;
+    padding:28px 30px; margin-bottom:32px;
+    box-shadow:0 1px 0 rgba(27,42,74,0.03);
+  }
+  .panel h2{
+    font-family:'Amiri', serif; font-size:21px; margin:0 0 18px; color:var(--ink);
+    border-bottom:2px solid var(--brass); display:inline-block; padding-bottom:6px;
+  }
+
+  .tabs{display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid var(--line);}
+  .tab-btn{
+    background:none; border:none; font-family:'Tajawal'; font-size:15px; color:var(--muted);
+    padding:10px 20px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .tab-btn.active{color:var(--ink); border-bottom-color:var(--stamp); font-weight:700;}
+
+  .field{display:none;}
+  .field.active{display:block;}
+
+  textarea{
+    width:100%; min-height:130px; resize:vertical; font-family:'Tajawal'; font-size:15px;
+    padding:14px; border:1px solid var(--line); border-radius:2px; background:var(--paper);
+    color:var(--ink); line-height:1.7;
+  }
+  textarea:focus{outline:2px solid var(--brass); outline-offset:1px;}
+
+  .dropzone{
+    border:1.5px dashed var(--line); border-radius:2px; padding:30px; text-align:center;
+    background:var(--paper); cursor:pointer; transition:border-color .15s ease;
+  }
+  .dropzone:hover, .dropzone.drag{border-color:var(--brass);}
+  .dropzone p{margin:6px 0 0; color:var(--muted); font-size:14px;}
+  .dropzone strong{color:var(--ink-soft); font-size:15px;}
+  #fileInput{display:none;}
+  #fileName{margin-top:10px; font-size:14px; color:var(--stamp); font-weight:500;}
+
+  .submit-row{display:flex; justify-content:flex-start; margin-top:18px;}
+  button.primary{
+    background:var(--ink); color:var(--paper); border:none; padding:11px 26px;
+    font-family:'Tajawal'; font-size:15px; font-weight:500; border-radius:2px; cursor:pointer;
+    transition:background .15s ease;
+  }
+  button.primary:hover{background:var(--ink-soft);}
+  button.primary:disabled{background:#B9B4A8; cursor:not-allowed;}
+
+  .search-row{display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+  .search-row input{
+    flex:1; padding:11px 14px; border:1px solid var(--line); border-radius:2px;
+    font-family:'Tajawal'; font-size:14px; background:var(--paper); color:var(--ink);
+  }
+  .search-row input:focus{outline:2px solid var(--brass); outline-offset:1px;}
+  .count-badge{font-size:13px; color:var(--muted); white-space:nowrap;}
+
+  table{width:100%; border-collapse:collapse; margin-top:16px;}
+  thead th{
+    text-align:right; font-size:12.5px; color:var(--muted); font-weight:500;
+    padding:8px 10px; border-bottom:1px solid var(--ink);
+  }
+  tbody td{
+    padding:13px 10px; border-bottom:1px solid var(--line); font-size:14.5px; vertical-align:middle;
+  }
+  tbody tr:hover{background:var(--paper-deep);}
+  .seq{color:var(--brass-deep); font-weight:700; font-family:'Amiri', serif; font-size:16px;}
+  .type-badge{
+    font-size:11.5px; padding:3px 9px; border-radius:20px; border:1px solid var(--line);
+    color:var(--ink-soft); white-space:nowrap;
+  }
+  .type-badge.pdf{border-color:var(--stamp); color:var(--stamp);}
+  .snippet{color:var(--ink); max-width:340px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .timestamp{color:var(--muted); font-size:13px; white-space:nowrap;}
+  .actions{display:flex; gap:6px; white-space:nowrap;}
+  .actions button, .actions a{
+    font-family:'Tajawal'; font-size:12.5px; border:1px solid var(--line); background:none;
+    padding:6px 11px; border-radius:2px; cursor:pointer; color:var(--ink-soft); text-decoration:none;
+  }
+  .actions a:hover{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .actions button.del:hover{background:var(--stamp); color:#fff; border-color:var(--stamp);}
+
+  .empty{padding:40px 10px; text-align:center; color:var(--muted); font-size:14.5px;}
+  .empty strong{display:block; font-family:'Amiri', serif; font-size:19px; color:var(--ink-soft); margin-bottom:6px;}
+
+  .hint{font-size:12.5px; color:var(--muted); margin-top:10px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>الأرشيف</h1>
+    <span>سجل الرسائل والمستندات</span>
+  </div>
+  <nav>
+    <a href="index.html" class="active">الوارد</a>
+    <a href="viewer.html">العرض</a>
+  </nav>
+</header>
+
+<main>
+
+  <section class="panel">
+    <h2>إدخال جديد</h2>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="text">رسالة نصية</button>
+      <button class="tab-btn" data-tab="pdf">ملف PDF</button>
+    </div>
+
+    <div class="field active" data-field="text">
+      <textarea id="textInput" placeholder="اكتب رسالتك هنا..."></textarea>
+    </div>
+
+    <div class="field" data-field="pdf">
+      <div class="dropzone" id="dropzone">
+        <strong>اسحب ملف PDF هنا أو اضغط للاختيار</strong>
+        <p>حد أقصى موصى به: عدة ميغابايت لكل ملف</p>
+        <div id="fileName"></div>
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf">
+    </div>
+
+    <div class="submit-row">
+      <button class="primary" id="submitBtn">حفظ في الأرشيف</button>
+    </div>
+    <div class="hint">يُسجَّل كل إدخال تلقائيًا بتاريخ ووقت الحفظ، ويمكن الوصول إليه لاحقًا من صفحة العرض.</div>
+  </section>
+
+  <section class="panel">
+    <h2>سجل الإدخالات</h2>
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="ابحث بالنص أو باسم الملف...">
+      <div class="count-badge" id="countBadge">0 عنصر</div>
+    </div>
+    <table id="entriesTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>التاريخ والوقت</th>
+          <th>النوع</th>
+          <th>المحتوى</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="entriesBody"></tbody>
+    </table>
+    <div class="empty" id="emptyState" style="display:none;">
+      <strong>لا توجد إدخالات بعد</strong>
+      أضف رسالة نصية أو ملف PDF أعلاه ليظهر هنا.
+    </div>
+  </section>
+
+</main>
+
+<script>
+const STORE_KEY = 'archive_store_v1';
+
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function saveEntries(list){
+  localStorage.setItem(STORE_KEY, JSON.stringify(list));
+}
+function nextSeq(list){
+  return list.reduce((m,e)=>Math.max(m, e.seq||0), 0) + 1;
+}
+function formatTimestamp(iso){
+  const d = new Date(iso);
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}  ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+function uid(){
+  return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+}
+
+// tabs
+const tabBtns = document.querySelectorAll('.tab-btn');
+const fields = document.querySelectorAll('.field');
+tabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabBtns.forEach(b=>b.classList.remove('active'));
+    fields.forEach(f=>f.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector(`.field[data-field="${btn.dataset.tab}"]`).classList.add('active');
+  });
+});
+
+// file input
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileNameEl = document.getElementById('fileName');
+let selectedFile = null;
+
+dropzone.addEventListener('click', ()=> fileInput.click());
+['dragover','dragenter'].forEach(ev=>dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.remove('drag'); }));
+dropzone.addEventListener('drop', e=>{
+  const f = e.dataTransfer.files[0];
+  if(f && f.type === 'application/pdf'){ selectedFile = f; fileNameEl.textContent = f.name; }
+});
+fileInput.addEventListener('change', ()=>{
+  const f = fileInput.files[0];
+  if(f){ selectedFile = f; fileNameEl.textContent = f.name; }
+});
+
+// submit
+document.getElementById('submitBtn').addEventListener('click', ()=>{
+  const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+  const list = loadEntries();
+
+  if(activeTab === 'text'){
+    const val = document.getElementById('textInput').value.trim();
+    if(!val){ alert('يرجى كتابة رسالة قبل الحفظ.'); return; }
+    const entry = {
+      id: uid(),
+      seq: nextSeq(list),
+      type: 'text',
+      title: val.slice(0,60),
+      content: val,
+      timestamp: new Date().toISOString()
+    };
+    list.unshift(entry);
+    saveEntries(list);
+    document.getElementById('textInput').value = '';
+    renderTable();
+  } else {
+    if(!selectedFile){ alert('يرجى اختيار ملف PDF قبل الحفظ.'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const list2 = loadEntries();
+      const entry = {
+        id: uid(),
+        seq: nextSeq(list2),
+        type: 'pdf',
+        title: selectedFile.name,
+        filename: selectedFile.name,
+        size: selectedFile.size,
+        content: reader.result,
+        timestamp: new Date().toISOString()
+      };
+      list2.unshift(entry);
+      saveEntries(list2);
+      selectedFile = null;
+      fileInput.value = '';
+      fileNameEl.textContent = '';
+      renderTable();
+    };
+    reader.readAsDataURL(selectedFile);
+  }
+});
+
+// table + search
+function renderTable(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = loadEntries();
+  if(q){
+    list = list.filter(e=>{
+      const hay = (e.title + ' ' + (e.filename||'') + ' ' + (e.type==='text'? e.content : '')).toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  const tbody = document.getElementById('entriesBody');
+  tbody.innerHTML = '';
+  document.getElementById('countBadge').textContent = `${list.length} عنصر`;
+  document.getElementById('emptyState').style.display = list.length ? 'none' : 'block';
+
+  list.forEach(e=>{
+    const tr = document.createElement('tr');
+    const snippet = e.type === 'text' ? e.title : (e.filename || 'ملف PDF');
+    tr.innerHTML = `
+      <td class="seq">${e.seq}</td>
+      <td class="timestamp">${formatTimestamp(e.timestamp)}</td>
+      <td><span class="type-badge ${e.type}">${e.type === 'pdf' ? 'PDF' : 'نص'}</span></td>
+      <td class="snippet" title="${snippet.replace(/"/g,'&quot;')}">${snippet}</td>
+      <td class="actions">
+        <a href="viewer.html?id=${e.id}">عرض</a>
+        <button class="del" data-id="${e.id}">حذف</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(!confirm('حذف هذا الإدخال نهائيًا؟')) return;
+      const all = loadEntries().filter(e=>e.id !== btn.dataset.id);
+      saveEntries(all);
+      renderTable();
+    });
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', renderTable);
+renderTable();
+</script>
+</body>
+</html>
